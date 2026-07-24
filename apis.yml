@@ -1,7 +1,30 @@
 aid: caretta
+accessModel:
+  pricing: unknown
+  onboarding: approval
+  trial: false
+  try_now: false
+  public: false
+  label: Requires approval
+  confidence: medium
+  source: []
+  generated: '2026-07-22'
+  method: derived
+image: https://kinlane-images.s3.amazonaws.com/shared/apis-json/icons/caretta.png
 name: Caretta
-description: Caretta is a company surfaced as a portfolio company of y-combinator and added to the API
-  Evangelist network as a stub for enrichment. This profile is a lead awaiting the enrichment pipeline.
+description: >-
+  Caretta is a Y Combinator-backed (W26) startup building a real-time AI
+  platform for sales teams. Its assistant joins reps in live calls to take
+  notes and surface relevant answers to information requests, questions, and
+  objections in real time, drawing on an organizational knowledge layer it
+  calls "Caretta Nous" that is built from company documentation, websites,
+  internal playbooks, and top-performer conversations. After calls it supports
+  teamspaces with analysis, morning briefs, and follow-up Q&A, and integrates
+  with tools such as Zoom, Google Meet, Microsoft Teams, Salesforce, HubSpot,
+  Pipedrive, Slack, and Notion. The company raised $1.3M in pre-seed funding.
+  As of this profile Caretta publishes no public API, developer portal, or
+  machine-readable specification; this entry captures its public identity and
+  trust surface.
 url: https://raw.githubusercontent.com/api-evangelist/caretta/refs/heads/main/apis.yml
 x-type: company
 x-source: vc-portfolio
@@ -11,12 +34,45 @@ x-tier: stub
 x-tier-reason: portfolio-lead
 specificationVersion: '0.20'
 created: '2026-07-17'
-modified: '2026-07-17'
+modified: '2026-07-18'
 tags:
 - Company
+- Artificial Intelligence
+- Sales
+- Sales Intelligence
+- Real-Time
+- Conversation Intelligence
+- Revenue Operations
+- Y Combinator
 apis: []
 maintainers:
 - FN: Kin Lane
   email: kin@apievangelist.com
 - FN: APIs.json
   email: info@apis.io
+common:
+- type: DomainSecurity
+  url: security/caretta-domain-security.yml
+- type: Website
+  url: https://www.caretta.so
+- type: Blog
+  url: https://www.caretta.so/blog
+- type: Integrations
+  url: https://www.caretta.so/integrations
+- type: TrustCenter
+  url: https://trust.caretta.so
+- type: TermsOfService
+  url: https://www.caretta.so/terms
+- type: PrivacyPolicy
+  url: https://www.caretta.so/privacy
+- type: Careers
+  url: https://www.caretta.so/careers
+- type: SignUp
+  url: https://www.caretta.so/demo
+- type: LinkedIn
+  url: https://www.linkedin.com/company/carettaai/
+x-enrichment:
+  date: '2026-07-19'
+  status: backfilled
+  pass: local-v1
+  note: backfilled from .gitignore signal + verified work evidence
