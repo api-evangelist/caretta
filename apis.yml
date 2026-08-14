@@ -1,15 +1,16 @@
 aid: caretta
 accessModel:
   pricing: unknown
-  onboarding: approval
+  onboarding: account
   trial: false
   try_now: false
   public: false
-  label: Requires approval
+  label: Requires a Caretta account
   confidence: medium
-  source: []
-  generated: '2026-07-22'
-  method: derived
+  source:
+  - https://www.caretta.so/docs/caretta-mcp
+  generated: '2026-08-13'
+  method: searched
 image: https://kinlane-images.s3.amazonaws.com/shared/apis-json/icons/caretta.png
 name: Caretta
 description: >-
@@ -21,10 +22,16 @@ description: >-
   internal playbooks, and top-performer conversations. After calls it supports
   teamspaces with analysis, morning briefs, and follow-up Q&A, and integrates
   with tools such as Zoom, Google Meet, Microsoft Teams, Salesforce, HubSpot,
-  Pipedrive, Slack, and Notion. The company raised $1.3M in pre-seed funding.
-  As of this profile Caretta publishes no public API, developer portal, or
-  machine-readable specification; this entry captures its public identity and
-  trust surface.
+  Pipedrive, Attio, Odoo, Cal.com, Slack, Telegram and Notion. The company
+  raised $1.3M in pre-seed funding. Caretta's developer surface is
+  agent-first rather than REST-first: it publishes a documented remote Model
+  Context Protocol server at gateway.caretta.app/mcp with OAuth-scoped access
+  to calls, transcripts and todos, a signed HMAC-SHA256 webhook surface that
+  pushes transcripts, AI notes and evaluated metrics to customer endpoints,
+  and a Zoom meeting-link integration. Its docs host serves llms.txt, an A2A
+  agent card and a published Agent Skill. Caretta's own documentation states
+  that a public REST API for endpoint management is planned but not yet
+  available, so no OpenAPI description is published.
 url: https://raw.githubusercontent.com/api-evangelist/caretta/refs/heads/main/apis.yml
 x-type: company
 x-source: vc-portfolio
@@ -34,7 +41,7 @@ x-tier: stub
 x-tier-reason: portfolio-lead
 specificationVersion: '0.20'
 created: '2026-07-17'
-modified: '2026-07-18'
+modified: '2026-08-13'
 tags:
 - Company
 - Artificial Intelligence
@@ -44,7 +51,36 @@ tags:
 - Conversation Intelligence
 - Revenue Operations
 - Y Combinator
-apis: []
+- Model Context Protocol
+- Webhooks
+- Agents
+apis:
+- name: Caretta MCP Server
+  description: >-
+    Remote Model Context Protocol server that gives compatible AI clients
+    OAuth-scoped access to the Caretta calls, transcripts and todos the
+    signed-in user can already see. Seven documented tools cover listing and
+    searching calls, retrieving a call with its transcript and todos, and
+    listing, creating and updating todos. Authorization is browser-based
+    OAuth with three product scopes (calls:read, todos:read, todos:write);
+    no API key is issued. The endpoint advertises an RFC 9728 OAuth
+    protected-resource document and returns a WWW-Authenticate challenge to
+    unauthenticated callers.
+  humanURL: https://www.caretta.so/docs/caretta-mcp
+  baseURL: https://gateway.caretta.app/mcp
+  tags:
+  - Model Context Protocol
+  - Agents
+  - Conversation Intelligence
+  properties:
+  - type: MCPServer
+    url: mcp/caretta-mcp.yml
+  - type: Documentation
+    url: https://www.caretta.so/docs/caretta-mcp
+  - type: OAuthScopes
+    url: scopes/caretta-scopes.yml
+  - type: Authentication
+    url: authentication/caretta-authentication.yml
 maintainers:
 - FN: Kin Lane
   email: kin@apievangelist.com
@@ -60,6 +96,8 @@ common:
 - type: Integrations
   url: https://www.caretta.so/integrations
 - type: TrustCenter
+  url: security/caretta-trust-center.yml
+- type: Compliance
   url: https://trust.caretta.so
 - type: TermsOfService
   url: https://www.caretta.so/terms
@@ -68,11 +106,54 @@ common:
 - type: Careers
   url: https://www.caretta.so/careers
 - type: SignUp
-  url: https://www.caretta.so/demo
+  url: https://www.caretta.so/signup
 - type: LinkedIn
   url: https://www.linkedin.com/company/carettaai/
+- type: DeveloperPortal
+  url: https://www.caretta.so/docs
+- type: Documentation
+  url: https://www.caretta.so/docs
+- type: GettingStarted
+  url: https://www.caretta.so/docs/webhooks
+- type: MCPServer
+  url: mcp/caretta-mcp.yml
+- type: Webhooks
+  url: asyncapi/caretta-webhooks.yml
+- type: AgentCard
+  url: a2a/caretta-a2a.yml
+- type: AgentSkill
+  url: skills/_index.yml
+- type: LLMsTxt
+  url: llms/caretta-llms.txt
+- type: WellKnown
+  url: well-known/caretta-well-known.yml
+- type: Authentication
+  url: authentication/caretta-authentication.yml
+- type: OAuthScopes
+  url: scopes/caretta-scopes.yml
+- type: Conventions
+  url: conventions/caretta-conventions.yml
+- type: Idempotency
+  url: conventions/caretta-conventions.yml
+- type: ErrorCatalog
+  url: errors/caretta-problem-types.yml
+- type: Conformance
+  url: conformance/caretta-conformance.yml
+- type: Lifecycle
+  url: lifecycle/caretta-lifecycle.yml
+- type: DataModel
+  url: data-model/caretta-data-model.yml
+# No Sandbox pointer: sandbox/caretta-sandbox.yml records that Caretta ships no
+# sandbox, no console and no test credentials. The only test facility is a
+# webhook test-event trigger inside the authenticated app, which is not a
+# developer-facing console. No SDKs or Packages pointer either:
+# packages/caretta-packages.yml records zero client libraries in any registry.
+- type: Plans
+  url: plans/caretta-plans-pricing.yml
+- type: RateLimits
+  url: rate-limits/caretta-rate-limits.yml
 x-enrichment:
-  date: '2026-07-19'
-  status: backfilled
+  date: '2026-08-13'
+  status: enriched
+  artifacts_added: 22
   pass: local-v1
-  note: backfilled from .gitignore signal + verified work evidence
