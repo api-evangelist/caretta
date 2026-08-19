@@ -1,0 +1,125 @@
+generated: '2026-08-13'
+method: derived
+source: asyncapi/caretta-webhooks.yml
+source_note: >-
+  Derived from the webhook payload examples published at
+  https://www.caretta.so/docs/webhooks and the MCP tool table at
+  https://www.caretta.so/docs/caretta-mcp. No OpenAPI or JSON Schema exists, so
+  there are no $ref links to walk; every field below appears literally in a
+  published payload example or tool description. Types are inferred from the
+  example values and marked as such. Nothing is invented.
+
+confidence: medium
+confidence_note: >-
+  Field names are high confidence (transcribed from published examples). Field
+  types, optionality and cardinality are medium confidence: they come from a
+  single example instance per event, and the provider explicitly warns that
+  payloads may carry additional fields.
+
+id_conventions:
+  style: prefixed ULID-like identifiers
+  observed_prefixes:
+  - {prefix: 'call_', entity: Call, example_form: 'call_01J...'}
+  - {prefix: 'evt_', entity: Event, example_form: 'evt_01J...'}
+  - {prefix: 'dlv_', entity: Delivery, example_form: 'dlv_01J...'}
+  note: >-
+    Published examples are elided by the provider ("call_01J..."), so only the
+    prefix and the leading ULID timestamp component are observable.
+
+entities:
+- name: Event
+  description: The webhook envelope common to every delivered event.
+  fields:
+  - {name: event, type: string, description: 'Event name, e.g. call.completed'}
+  - {name: schema_version, type: integer, description: 'Payload schema version; currently 1'}
+  - {name: event_id, type: string, description: 'Stable idempotency key, evt_ prefixed'}
+  - {name: delivery_id, type: string, description: 'One delivery attempt, dlv_ prefixed'}
+  - {name: occurred_at, type: string(date-time), description: ISO 8601 UTC timestamp}
+  - {name: data, type: object, description: Event-specific body}
+
+- name: Call
+  description: A captured sales call. The root entity of the model.
+  identified_by: id
+  fields:
+  - {name: id, type: string, description: 'call_ prefixed identifier'}
+  - {name: title, type: string, description: 'Call title, e.g. "Acme discovery"'}
+  - {name: duration_seconds, type: integer, description: Call length in seconds}
+  - {name: owner, type: object, description: The Person who owns the call}
+  - {name: participants, type: array, description: Person entries on the call}
+  eligibility_rule: >-
+    Only calls longer than 60 seconds that have not been deleted produce webhook
+    events.
+
+- name: Person
+  description: >-
+    A call owner or participant. Not independently addressable — appears only
+    embedded in a Call. No id field is published for this entity.
+  fields:
+  - {name: name, type: string}
+  - {name: email, type: string(email)}
+
+- name: TranscriptSegment
+  description: One speaker turn in a call transcript.
+  fields:
+  - {name: speaker, type: string, description: 'Observed values: seller, client'}
+  - {name: text, type: string}
+
+- name: Notes
+  description: >-
+    AI-generated meeting notes for a call. Best-effort: roughly 3-4% of calls
+    never produce them.
+  fields:
+  - {name: notes_markdown, type: string, description: Markdown notes body}
+  - {name: summary, type: string, description: One-line call summary}
+  - {name: next_steps, type: array(string), description: Extracted follow-up actions}
+
+- name: Metric
+  description: One evaluated metric for a call.
+  fields:
+  - {name: slug, type: string, description: 'Stable metric key, e.g. discovery-quality'}
+  - {name: name, type: string, description: 'Display name, e.g. Discovery quality'}
+  - {name: value, type: number, description: 'Score, observed 0.0-1.0'}
+  - {name: confidence, type: number, description: 'Evaluator confidence, observed 0.0-1.0'}
+  - {name: evidence, type: string, description: Free-text justification quoting the call}
+  - {name: evaluated_at, type: string(date-time), description: Use to identify the latest re-evaluation}
+  note: >-
+    A completed evaluation may return an empty metrics array with a skip reason.
+    Metrics are re-evaluable, so evaluated_at is the freshness discriminator.
+
+- name: Todo
+  description: >-
+    A task associated with a call. Only reachable through the MCP server; todos
+    do not appear in any published webhook payload.
+  fields_note: >-
+    No payload example is published. The MCP tool descriptions name these
+    mutable attributes: text, owner, due date, completion state. Field names and
+    types are NOT published and are deliberately not guessed here.
+  attributes_named: [text, owner, due date, completion state]
+
+relationships:
+- {from: Event, to: Call, type: has_one, via: data.call.id}
+- {from: Call, to: Person, type: has_one, via: owner, role: owner}
+- {from: Call, to: Person, type: has_many, via: participants, role: participant}
+- {from: Call, to: TranscriptSegment, type: has_many, via: transcript}
+- {from: Call, to: Notes, type: has_one, via: 'call.notes_ready payload'}
+- {from: Call, to: Metric, type: has_many, via: 'call.metrics_ready payload'}
+- {from: Todo, to: Call, type: belongs_to, via: 'caretta_list_todos / caretta_create_todo call filter'}
+
+access_paths:
+- {entity: Call, surface: mcp, tools: [caretta_list_calls, caretta_list_my_calls, caretta_get_call]}
+- {entity: Call, surface: webhooks, events: [call.completed, call.ready]}
+- {entity: TranscriptSegment, surface: mcp, tools: [caretta_search_transcripts, caretta_get_call]}
+- {entity: TranscriptSegment, surface: webhooks, events: [call.completed, call.ready]}
+- {entity: Notes, surface: webhooks, events: [call.notes_ready, call.ready]}
+- {entity: Metric, surface: webhooks, events: [call.metrics_ready, call.ready]}
+- {entity: Todo, surface: mcp, tools: [caretta_list_todos, caretta_create_todo, caretta_update_todo, caretta_get_call]}
+
+surface_divergence:
+  mcp_only: [Todo]
+  webhooks_only: [Notes, Metric]
+  both: [Call, TranscriptSegment]
+  note: >-
+    The two surfaces are non-identical projections of one core. Todos are
+    readable and writable only through MCP and never delivered by webhook; AI
+    notes and evaluated metrics are delivered only by webhook and have no
+    documented MCP tool. An integration needing all of them must consume both.

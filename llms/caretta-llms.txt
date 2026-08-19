@@ -1,0 +1,14 @@
+# Caretta Docs
+
+> Connect AI agents to your Caretta data, push call data into your own systems, and create meeting links.
+
+## Docs
+
+- [Overview](https://www.caretta.so/docs/index.md): Connect AI agents to your Caretta data, push call data into your own systems, and create meeting links for your calendar invitations.
+- [Connect to the Caretta MCP](https://www.caretta.so/docs/caretta-mcp.md): Give AI tools secure, scoped access to your Caretta calls, transcripts, and todos.
+- [Receive Caretta webhooks](https://www.caretta.so/docs/webhooks.md): Deliver transcripts, AI notes, and evaluated metrics to your HTTPS endpoint after a call.
+- [Connect Zoom to Caretta](https://www.caretta.so/docs/zoom.md): Let Caretta create Zoom meeting links for calendar invitations on your behalf.
+
+## OpenAPI Specs
+
+- [openapi](https://www.caretta.so/docs/api-reference/openapi.json)

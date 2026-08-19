@@ -1,0 +1,125 @@
+generated: '2026-08-13'
+method: searched
+source: https://www.caretta.so/docs/webhooks
+docs:
+- https://www.caretta.so/docs/webhooks
+- https://www.caretta.so/docs/caretta-mcp
+scope_note: >-
+  Caretta has no public REST API, so these conventions describe the two surfaces
+  it does publish: the OAuth-gated MCP server and the outbound signed webhook
+  stream. Every rule below is stated in the provider's own docs.
+
+authentication:
+  style: oauth2-bearer (MCP, inbound) and HMAC-SHA256 signing (webhooks, outbound)
+  api_keys: none issued
+  detail: authentication/caretta-authentication.yml
+
+idempotency:
+  supported: true
+  direction: outbound
+  mechanism: stable event identifier for consumer-side deduplication
+  key_header: X-Caretta-Event-Id
+  key_description: >-
+    Stable idempotency key for the event. Retries reuse it, so a consumer that
+    records seen event ids can safely discard duplicates.
+  attempt_header: X-Caretta-Delivery-Id
+  attempt_description: >-
+    Identifier for one delivery attempt. Network retries reuse it. Distinct from
+    the event id: use the event id for deduplication, the delivery id for
+    tracing a single attempt.
+  delivery_guarantee: at-least-once
+  consumer_requirement: >-
+    Provider states verbatim: "Delivery is at least once. Deduplicate using
+    X-Caretta-Event-Id."
+  retention: not published
+  inbound_idempotency_key: false
+  inbound_note: >-
+    The MCP write tools (caretta_create_todo, caretta_update_todo) do not
+    document an idempotency key. Idempotency support here is real but
+    webhook-side only; it is recorded honestly as such.
+
+pagination:
+  style: cursor
+  documented_on: caretta_list_my_calls ("List only calls you own, with cursor pagination")
+  parameters: not published
+  response_fields: not published
+  note: >-
+    Cursor pagination is named in the tool table but no parameter or response
+    field names are published, because tools/list is OAuth-gated and no OpenAPI
+    exists. Not inferred.
+
+ordering:
+  guaranteed: false
+  correlation_key: data.call.id
+  note: >-
+    Event ordering is not guaranteed. Provider instructs consumers to correlate
+    related events with data.call.id rather than relying on arrival order.
+
+versioning:
+  scheme: payload-field
+  field: schema_version
+  current: 1
+  url_versioning: false
+  header_versioning: false
+  forward_compatibility: >-
+    Provider instructs consumers to tolerate additional fields so they remain
+    compatible as Caretta adds data.
+  detail: lifecycle/caretta-lifecycle.yml
+
+request_tracing:
+  header: X-Caretta-Delivery-Id
+  scope: one delivery attempt, reused across network retries
+
+error_envelope:
+  inbound_mcp:
+    shape: '{"message": "<text>"}'
+    observed: true
+    note: >-
+      Observed directly on the gateway host: 401 returns
+      {"message":"Authentication required"} and an unknown path returns
+      {"message":"Route not found"}. Not RFC 9457; no type/title/status/detail
+      members and content-type is application/json, not application/problem+json.
+    detail: errors/caretta-problem-types.yml
+  outbound_webhooks:
+    consumer_ack: any 2xx within 10 seconds
+    failure_handling: retried with backoff for approximately two hours
+
+rate_limit_signaling:
+  headers: none published
+  detail: rate-limits/caretta-rate-limits.yml
+
+timeouts:
+  webhook_ack_seconds: 10
+  webhook_retry_window: approximately two hours
+  signature_replay_window_seconds: 300
+
+field_expansion:
+  supported: partial
+  mechanism: >-
+    caretta_get_call retrieves one call "optionally with its transcript and
+    todos" — an opt-in expansion, though the parameter name is not published.
+
+metadata:
+  supported: unknown
+  note: no metadata/custom-field convention is documented.
+
+security_conventions:
+  raw_body_verification_required: true
+  raw_body_warning: >-
+    Verify the original raw request body. Parsing JSON and serialising it again
+    can change whitespace or key order and will break signature verification.
+  constant_time_comparison: >-
+    Provider's reference verifier uses crypto.timingSafeEqual and checks length
+    before comparing.
+  secret_handling: >-
+    Signing secret is shown once at creation; provider instructs storing it in a
+    secrets manager or encrypted environment variable and rotating on exposure.
+
+cross_links:
+  errors: errors/caretta-problem-types.yml
+  lifecycle: lifecycle/caretta-lifecycle.yml
+  authentication: authentication/caretta-authentication.yml
+  scopes: scopes/caretta-scopes.yml
+  rate_limits: rate-limits/caretta-rate-limits.yml
+  webhooks: asyncapi/caretta-webhooks.yml
+  mcp: mcp/caretta-mcp.yml

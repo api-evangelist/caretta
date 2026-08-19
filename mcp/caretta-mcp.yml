@@ -1,0 +1,121 @@
+generated: '2026-08-13'
+method: searched
+source: https://www.caretta.so/docs/caretta-mcp
+status: published
+
+deployment:
+  mode: remote
+  endpoint: https://gateway.caretta.app/mcp
+  auth: oauth
+  verified: probed
+  note: >-
+    Remote-only. Caretta ships no stdio package and no npx/pip install command;
+    the only way to reach the server is for an MCP client to POST to the HTTPS
+    endpoint above and complete browser-based OAuth. Endpoint existence was
+    verified directly: an unauthenticated POST of tools/list returned HTTP 401
+    with WWW-Authenticate: Bearer realm="caretta-mcp",
+    resource_metadata="https://gateway.caretta.app/.well-known/oauth-protected-resource/mcp".
+
+server:
+  name: caretta
+  transport: http
+  url: https://gateway.caretta.app/mcp
+  documentation: https://www.caretta.so/docs/caretta-mcp
+  api_key_required: false
+  authorization:
+    model: oauth
+    flow: browser-based authorization code, per-client consent
+    protected_resource_metadata: https://gateway.caretta.app/.well-known/oauth-protected-resource
+    authorization_servers:
+    - https://ztejbfpbhxgwecvxngtf.supabase.co/auth/v1
+    dynamic_client_registration: true
+    note: >-
+      The RFC 9728 protected-resource document names a Supabase-hosted
+      authorization server and advertises scopes_supported [openid]; the three
+      Caretta product scopes below are documented in the developer docs and are
+      selected by the user during the consent step, not advertised in the
+      transport-level metadata.
+
+scopes:
+- scope: calls:read
+  description: View call metadata, summaries, and transcripts you can access.
+- scope: todos:read
+  description: View todos created from your calls.
+- scope: todos:write
+  description: Add new todos and modify existing todos on calls you can access.
+
+# Tool names, purposes and required scopes are transcribed verbatim from the
+# provider's published "Available tools" table. Input schemas are NOT recorded:
+# tools/list is OAuth-gated, so the live inputSchema per tool could not be read
+# anonymously and is not published anywhere in the docs. Recording guessed
+# parameters would fabricate a contract.
+tools_schema_status: gated
+tools_schema_note: >-
+  tools/list requires an authenticated bearer token (HTTP 401 anonymously).
+  Per-tool inputSchema requires authenticated introspection with a Caretta
+  account; only names, purposes and required scopes are published.
+
+tools:
+- name: caretta_list_calls
+  description: List recent calls you own, attended, or that were shared with you.
+  required_scopes: [calls:read]
+- name: caretta_list_my_calls
+  description: List only calls you own, with cursor pagination.
+  required_scopes: [calls:read]
+- name: caretta_search_transcripts
+  description: Search accessible transcripts and summaries.
+  required_scopes: [calls:read]
+- name: caretta_get_call
+  description: Retrieve one accessible call, optionally with its transcript and todos.
+  required_scopes: [calls:read, todos:read]
+  note: todos:read is required only when todos are requested alongside the call.
+- name: caretta_list_todos
+  description: List visible todos, optionally filtered by call or completion state.
+  required_scopes: [todos:read]
+- name: caretta_create_todo
+  description: Create a todo on an accessible call.
+  required_scopes: [todos:write]
+- name: caretta_update_todo
+  description: Update a todo's text, owner, due date, or completion state.
+  required_scopes: [todos:write]
+
+clients_documented:
+- name: Any MCP client
+  instruction: Add the remote HTTP server URL https://gateway.caretta.app/mcp
+- name: Codex
+  instruction: '[mcp_servers.caretta] url = "https://gateway.caretta.app/mcp" in ~/.codex/config.toml'
+- name: Claude Code
+  instruction: claude mcp add --transport http caretta https://gateway.caretta.app/mcp
+
+access_control:
+  follows_user_permissions: true
+  note: >-
+    The server follows the signed-in user's existing Caretta access and cannot
+    return calls the user could not otherwise see. Authorised clients and their
+    scopes are listed under Settings -> Caretta MCP, where each can be
+    unauthorised individually; existing authorisations cannot silently expand
+    their own permissions.
+
+x-evidence:
+- url: https://www.caretta.so/docs/caretta-mcp
+  http_status: 200
+  fetched: '2026-08-13'
+  note: source of the endpoint, scope table and tool table
+- url: https://gateway.caretta.app/mcp
+  http_status: 401
+  fetched: '2026-08-13'
+  note: 'POST tools/list -> {"message":"Authentication required"} with WWW-Authenticate bearer challenge'
+- url: https://gateway.caretta.app/.well-known/oauth-protected-resource
+  http_status: 200
+  fetched: '2026-08-13'
+  note: RFC 9728 protected resource metadata
+
+x-ownership:
+  host: gateway.caretta.app
+  justification: >-
+    gateway.caretta.app is a different registrable domain from the marketing
+    site caretta.so, but Caretta's own documentation at
+    https://www.caretta.so/docs/caretta-mcp names https://gateway.caretta.app/mcp
+    as "the Caretta MCP server" in three separate client setup examples, and the
+    endpoint's own RFC 9728 metadata points resource_documentation back at
+    https://caretta.so/docs/caretta-mcp. The two hosts cross-reference each other.

@@ -1,0 +1,66 @@
+generated: '2026-08-13'
+method: searched
+source: registry searches across npm, PyPI, RubyGems, crates.io, NuGet, Maven Central and pkg.go.dev
+package_count: 0
+official_package_count: 0
+
+summary: >-
+  Caretta ships no client libraries in any public registry, and none are
+  referenced anywhere in its documentation. This is consistent with its
+  integration model: the MCP server is reached by any MCP client over plain
+  HTTP with OAuth (no SDK needed), and webhooks are consumed by the customer's
+  own HTTP handler. No SDKs pointer is emitted in apis.yml.
+
+packages: []
+
+registries_checked:
+- {registry: npm, queries: [caretta, caretta-sdk, caretta-mcp, '@caretta/sdk', '@caretta/mcp'], result: 404, checked: '2026-08-13'}
+- {registry: pypi, queries: [caretta-sdk], result: 404, checked: '2026-08-13'}
+- {registry: rubygems, result: none, checked: '2026-08-13'}
+- {registry: crates.io, result: none, checked: '2026-08-13'}
+- {registry: nuget, result: none, checked: '2026-08-13'}
+- {registry: maven-central, result: none, checked: '2026-08-13'}
+- {registry: pkg.go.dev, result: none, checked: '2026-08-13'}
+
+false_positives_excluded:
+- registry: pypi
+  name: caretta
+  url: https://pypi.org/project/caretta/
+  version: 0.1.2
+  published: null
+  official: false
+  excluded: true
+  reason: >-
+    NOT this company. "caretta" on PyPI is "Fast multiple protein structure
+    alignment" by Janani Durairaj and Mehmet Akdel, homepage
+    https://github.com/TurtleTools/caretta. Caretta is also the genus name of
+    the loggerhead sea turtle, which makes this namespace collision likely to
+    recur — recorded so a future round does not re-adopt it.
+
+cdn_distributions: []
+cdn_note: >-
+  No script-tag, unpkg or jsDelivr distribution is referenced in the docs; there
+  is no browser-side Caretta library.
+
+reference_code_published:
+- language: javascript
+  kind: snippet
+  name: verify-caretta-signature.js
+  description: >-
+    Node.js webhook signature verifier using crypto.createHmac and
+    crypto.timingSafeEqual. Published inline in the docs, not distributed as a
+    package.
+  source: https://www.caretta.so/docs/webhooks
+  registry: none
+  version: null
+  published: null
+  official: true
+
+source_code:
+  github_org: null
+  note: >-
+    No first-party GitHub organisation was found and none is linked from the
+    website, docs or footer. GitHub org lookups for caretta, carettaai,
+    caretta-ai and caretta-so returned HTTP 403 (unauthenticated API rate limit)
+    rather than a definitive 404, so this is recorded as "not found and not
+    linked" rather than "confirmed absent".

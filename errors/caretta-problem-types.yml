@@ -1,0 +1,106 @@
+generated: '2026-08-13'
+method: probed
+source: live probes of https://gateway.caretta.app
+format: proprietary-json
+format_note: >-
+  NOT RFC 9457. Responses are content-type application/json with a single
+  "message" string; there is no type, title, status, detail or instance member,
+  and no application/problem+json media type is served. Caretta publishes no
+  error reference page and no OpenAPI, so this catalog is limited to statuses
+  observed directly against the live gateway plus the consumer-side failure
+  conditions documented for webhooks. It is deliberately short rather than
+  padded.
+
+envelope:
+  shape: '{"message": "<human readable text>"}'
+  media_type: application/json
+  members: [message]
+
+problems:
+- status: 401
+  message: Authentication required
+  surface: https://gateway.caretta.app/mcp
+  observed: true
+  method_observed: POST (jsonrpc tools/list)
+  www_authenticate: >-
+    Bearer realm="caretta-mcp",
+    resource_metadata="https://gateway.caretta.app/.well-known/oauth-protected-resource/mcp"
+  remediation: >-
+    Complete the browser-based OAuth flow for the MCP server and retry with a
+    Bearer token in the Authorization header. The challenge points at the RFC
+    9728 protected-resource document, so a compliant MCP client can discover the
+    authorization server automatically.
+- status: 404
+  message: Route not found
+  surface: https://gateway.caretta.app
+  observed: true
+  method_observed: GET
+  remediation: >-
+    Only /mcp and /.well-known/oauth-protected-resource[/mcp] are routed on the
+    gateway host. All other paths, including /openapi.json,
+    /.well-known/openid-configuration and /.well-known/agent-card.json, return
+    this error.
+
+documented_failure_conditions:
+- condition: missing scope on an MCP tool call
+  surface: MCP
+  source: https://www.caretta.so/docs/caretta-mcp
+  observed: false
+  description: >-
+    A tool reports that a scope is missing. Existing authorisations cannot
+    silently expand their own permissions.
+  remediation: >-
+    Unauthorise the client in Settings -> Caretta MCP, reconnect, and select the
+    required scope.
+  note: status code and body not published; not observed because tools/list is gated.
+- condition: call not visible to the caller
+  surface: MCP
+  source: https://www.caretta.so/docs/caretta-mcp
+  observed: false
+  description: >-
+    The server follows the caller's Caretta access and cannot bypass Caretta
+    permissions, so calls the user does not own, did not attend and were not
+    shared with them are not returned.
+- condition: webhook signature verification failure
+  surface: webhooks (consumer side)
+  source: https://www.caretta.so/docs/webhooks
+  observed: false
+  description: >-
+    Most commonly caused by verifying a re-serialised JSON body instead of the
+    raw request body, or by accepting a request whose X-Caretta-Timestamp is
+    more than five minutes old.
+- condition: webhook delivery not acknowledged
+  surface: webhooks (consumer side)
+  source: https://www.caretta.so/docs/webhooks
+  observed: false
+  description: >-
+    A consumer that does not return 2xx within 10 seconds is retried with
+    backoff for approximately two hours.
+- condition: notes never generated
+  surface: webhooks
+  source: https://www.caretta.so/docs/webhooks
+  observed: false
+  description: >-
+    Roughly 3-4% of calls never generate notes. call.notes_ready is not sent and
+    a bundled call.ready that requires notes is never delivered. This is a
+    silent non-delivery, not an error response.
+- condition: metrics evaluation skipped
+  surface: webhooks
+  source: https://www.caretta.so/docs/webhooks
+  observed: false
+  description: >-
+    call.metrics_ready can carry an empty metrics array together with a recorded
+    skip reason rather than failing.
+
+gaps:
+- No published error reference page.
+- No status codes or bodies published for MCP tool-level failures.
+- No machine-readable error catalog; no RFC 9457 adoption.
+
+x-evidence:
+- url: https://gateway.caretta.app/mcp
+  http_status: 401
+  fetched: '2026-08-13'
+- url: https://gateway.caretta.app/openapi.json
+  http_status: 404
+  fetched: '2026-08-13'

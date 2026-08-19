@@ -1,0 +1,78 @@
+generated: '2026-08-13'
+method: searched
+source: https://gateway.caretta.app/.well-known/oauth-protected-resource
+docs: https://www.caretta.so/docs/caretta-mcp
+
+note: >-
+  Caretta issues no API keys. The only authorization surface is the OAuth flow
+  in front of the MCP server. Two distinct scope layers exist and they do not
+  match, which is recorded here rather than reconciled: the RFC 9728
+  protected-resource document advertises only the OIDC scope "openid", while the
+  three product scopes a user actually consents to are documented in the
+  developer docs and surfaced in the consent screen.
+
+schemes:
+- name: MCP OAuth
+  type: oauth2
+  resource: https://gateway.caretta.app/mcp
+  protected_resource_metadata: https://gateway.caretta.app/.well-known/oauth-protected-resource
+  bearer_methods_supported: [header]
+  authorization_servers:
+  - issuer: https://ztejbfpbhxgwecvxngtf.supabase.co/auth/v1
+    authorization_endpoint: https://ztejbfpbhxgwecvxngtf.supabase.co/auth/v1/oauth/authorize
+    token_endpoint: https://ztejbfpbhxgwecvxngtf.supabase.co/auth/v1/oauth/token
+    jwks_uri: https://ztejbfpbhxgwecvxngtf.supabase.co/auth/v1/.well-known/jwks.json
+    registration_endpoint: https://ztejbfpbhxgwecvxngtf.supabase.co/auth/v1/oauth/clients/register
+    grant_types_supported: [authorization_code, refresh_token]
+    response_types_supported: [code]
+    code_challenge_methods_supported: [S256, plain]
+    scopes_supported: [openid, profile, email, phone, offline_access]
+    note: >-
+      Third-party Supabase Auth tenant, named as the authorization server by
+      Caretta's own protected-resource document. Its metadata is generic Supabase
+      Auth and is recorded as evidence, not as a Caretta-authored document.
+
+scopes:
+- scope: calls:read
+  description: View call metadata, summaries, and transcripts you can access.
+  layer: product
+  sources: [https://www.caretta.so/docs/caretta-mcp]
+  grants_tools: [caretta_list_calls, caretta_list_my_calls, caretta_search_transcripts, caretta_get_call]
+- scope: todos:read
+  description: View todos created from your calls.
+  layer: product
+  sources: [https://www.caretta.so/docs/caretta-mcp]
+  grants_tools: [caretta_list_todos, caretta_get_call]
+- scope: todos:write
+  description: Add new todos and modify existing todos on calls you can access.
+  layer: product
+  sources: [https://www.caretta.so/docs/caretta-mcp]
+  grants_tools: [caretta_create_todo, caretta_update_todo]
+- scope: openid
+  description: OIDC subject identity. The only scope advertised in the RFC 9728 metadata.
+  layer: transport
+  sources: [https://gateway.caretta.app/.well-known/oauth-protected-resource]
+
+consent_model:
+  user_selects_scopes: true
+  least_privilege_guidance: >-
+    Provider guidance: grant calls:read for call and transcript questions, add
+    todos:read to retrieve todos, and add todos:write only if the client should
+    create or change them.
+  escalation: >-
+    Existing authorisations cannot silently expand their own permissions. To add
+    a scope, unauthorise the client in Settings -> Caretta MCP and reconnect.
+  revocation: >-
+    Per-client Unauthorise in Settings -> Caretta MCP. Revoking one client does
+    not affect other authorised MCP clients.
+
+x-evidence:
+- url: https://gateway.caretta.app/.well-known/oauth-protected-resource
+  http_status: 200
+  fetched: '2026-08-13'
+- url: https://ztejbfpbhxgwecvxngtf.supabase.co/auth/v1/.well-known/oauth-authorization-server
+  http_status: 200
+  fetched: '2026-08-13'
+- url: https://www.caretta.so/docs/caretta-mcp
+  http_status: 200
+  fetched: '2026-08-13'

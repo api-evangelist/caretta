@@ -1,0 +1,90 @@
+generated: '2026-08-13'
+method: searched
+source: https://www.caretta.so/docs/caretta-mcp
+docs:
+- https://www.caretta.so/docs/caretta-mcp
+- https://www.caretta.so/docs/webhooks
+- https://www.caretta.so/docs/zoom
+note: >-
+  Derived by hand, not by derive-authentication.py: Caretta publishes no OpenAPI
+  document, so there are no securitySchemes to aggregate. Everything below is
+  transcribed from the provider's published docs and from live probes of the
+  gateway host.
+
+summary:
+  types: [oauth2, hmac]
+  api_key_issued: false
+  api_key_note: >-
+    Provider states verbatim: "You do not need to create an API key." There is no
+    key-issuance surface at all.
+  oauth2_flows: [authorizationCode]
+  inbound_auth: oauth2 bearer (MCP only)
+  outbound_auth: HMAC-SHA256 request signing (webhooks)
+
+schemes:
+- name: MCP OAuth
+  type: oauth2
+  surface: inbound
+  applies_to: https://gateway.caretta.app/mcp
+  flow: authorizationCode
+  token_type: Bearer
+  bearer_methods_supported: [header]
+  browser_based_consent: true
+  dynamic_client_registration: true
+  protected_resource_metadata: https://gateway.caretta.app/.well-known/oauth-protected-resource
+  metadata_spec: RFC 9728
+  authorization_servers: [https://ztejbfpbhxgwecvxngtf.supabase.co/auth/v1]
+  scopes: [calls:read, todos:read, todos:write]
+  scopes_artifact: scopes/caretta-scopes.yml
+  challenge_observed: >-
+    WWW-Authenticate: Bearer realm="caretta-mcp",
+    resource_metadata="https://gateway.caretta.app/.well-known/oauth-protected-resource/mcp"
+  authorization_model: >-
+    Tokens are user-delegated. The server follows the signed-in user's existing
+    Caretta permissions and cannot return calls the user could not otherwise see.
+  revocation: Settings -> Caretta MCP -> Unauthorise, per client.
+  sources: [https://www.caretta.so/docs/caretta-mcp]
+
+- name: Webhook signature
+  type: hmac
+  surface: outbound
+  applies_to: customer HTTPS endpoints
+  algorithm: HMAC-SHA256
+  signed_payload: '{timestamp}.{raw request body}'
+  signature_header: X-Caretta-Signature
+  signature_format: 'v1=<hex digest>'
+  timestamp_header: X-Caretta-Timestamp
+  replay_window_seconds: 300
+  secret_distribution: per-endpoint signing secret, displayed once at creation
+  secret_rotation: supported in Settings -> Webhooks; previous secret invalidated immediately
+  reference_implementation: >-
+    Node.js verifier published in the docs using crypto.createHmac and
+    crypto.timingSafeEqual.
+  sources: [https://www.caretta.so/docs/webhooks]
+
+- name: Zoom OAuth (third-party, outbound)
+  type: oauth2
+  surface: outbound-integration
+  applies_to: Zoom API on behalf of the connecting user
+  flow: authorizationCode
+  scopes_requested: [meeting:write:meeting]
+  token_storage: access and refresh tokens stored by Caretta to keep the connection working
+  least_privilege_claim: >-
+    Provider states Caretta does not request permission to read the Zoom profile,
+    list existing meetings, access recordings, read transcripts, or join
+    meetings. One permission only.
+  admin_approval: may be required by the customer's Zoom account policy
+  revocation: Caretta Settings -> Integrations -> Disconnect, and/or Zoom Marketplace -> Added Apps -> Remove
+  sources: [https://www.caretta.so/docs/zoom]
+
+x-evidence:
+- url: https://gateway.caretta.app/mcp
+  http_status: 401
+  fetched: '2026-08-13'
+  note: anonymous POST returns the bearer challenge above
+- url: https://gateway.caretta.app/.well-known/oauth-protected-resource
+  http_status: 200
+  fetched: '2026-08-13'
+- url: https://www.caretta.so/docs/caretta-mcp
+  http_status: 200
+  fetched: '2026-08-13'

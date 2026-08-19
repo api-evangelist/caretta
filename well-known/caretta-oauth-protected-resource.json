@@ -1,0 +1,1 @@
+{"resource":"https://gateway.caretta.app/mcp","scopes_supported":["openid"],"bearer_methods_supported":["header"],"authorization_servers":["https://ztejbfpbhxgwecvxngtf.supabase.co/auth/v1"],"resource_documentation":"https://caretta.so/docs/caretta-mcp"}

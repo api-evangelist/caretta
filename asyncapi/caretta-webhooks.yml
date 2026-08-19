@@ -1,0 +1,119 @@
+generated: '2026-08-13'
+method: searched
+source: https://www.caretta.so/docs/webhooks
+spec_type: none
+spec_note: >-
+  Caretta publishes NO AsyncAPI document. This artifact is the webhook catalog
+  transcribed from the provider's own published webhook reference; type Webhooks
+  is emitted, type AsyncAPI is not. Nothing here is inferred — every event,
+  header, payload field and delivery rule below is stated in the docs.
+
+surface: outbound-webhooks
+direction: caretta-to-customer
+transport: HTTPS POST
+configuration:
+  location: Settings -> Webhooks (Caretta app)
+  required_role: organisation administrator
+  endpoint_requirement: public HTTPS URL
+  management_api: false
+  management_api_note: >-
+    Provider states verbatim: "Endpoint management through a public REST API is
+    planned but is not currently available." Endpoints are managed only in the UI.
+
+delivery_modes:
+- mode: per-event
+  default: true
+  description: >-
+    Any combination of call.completed, call.notes_ready and call.metrics_ready;
+    each component is sent as soon as it is ready. Lowest latency.
+- mode: bundled
+  default: false
+  description: >-
+    One call.ready event after all selected components are ready. Transcript is
+    always included; notes and metrics are optional.
+  caveat: >-
+    If a bundle requires notes and notes never generate (roughly 3-4% of calls,
+    usually because the desktop app is closed before generation completes), the
+    bundle is never delivered. Provider recommends a second per-event
+    call.completed endpoint as a safety net.
+
+eligibility:
+  included: real calls longer than 60 seconds that have not been deleted
+  excluded: calls of 60 seconds or less; deleted calls
+
+events:
+- event: call.completed
+  sent_when: A captured call finishes processing.
+  key_data: Call envelope and transcript.
+  payload_fields: [event, schema_version, event_id, delivery_id, occurred_at, data.call.id, data.call.title, data.call.duration_seconds, data.call.owner, data.call.participants, data.transcript]
+- event: call.notes_ready
+  sent_when: AI-generated notes become available.
+  key_data: Markdown notes, summary, and next steps.
+  payload_fields: [event, schema_version, event_id, delivery_id, occurred_at, data.call.id, data.notes_markdown, data.summary, data.next_steps]
+  reliability: best-effort
+- event: call.metrics_ready
+  sent_when: Metric evaluation finishes.
+  key_data: Evaluated metrics, or an empty list with a skip reason.
+  payload_fields: [event, schema_version, event_id, delivery_id, occurred_at, data.call.id, data.metrics]
+  note: >-
+    A completed evaluation can return an empty metrics array with a skip reason.
+    Metrics can be re-evaluated; use evaluated_at to identify the latest result.
+- event: call.ready
+  sent_when: Every selected bundled component is ready.
+  key_data: Transcript plus the selected notes and/or metrics.
+- event: webhook.test
+  sent_when: An administrator sends a test from Settings.
+  key_data: A test message.
+
+envelope:
+  common_fields: [event, schema_version, event_id, delivery_id, occurred_at]
+  schema_version: 1
+  forward_compatibility: >-
+    Provider instructs consumers to tolerate additional fields so they remain
+    compatible as Caretta adds data.
+
+signing:
+  algorithm: HMAC-SHA256
+  signed_payload: '{timestamp}.{raw request body}'
+  key: per-endpoint signing secret, displayed once at creation, rotatable
+  rotation_note: Rotating the secret invalidates the previous secret immediately.
+  verification_warning: >-
+    Verify against the ORIGINAL raw request body. Parsing JSON and
+    re-serialising can change whitespace or key order and will break
+    verification. Provider publishes a Node.js reference verifier using
+    crypto.timingSafeEqual.
+  headers:
+  - header: X-Caretta-Signature
+    description: 'v1= followed by the hexadecimal HMAC-SHA256 signature.'
+  - header: X-Caretta-Timestamp
+    description: Unix timestamp in seconds. Reject requests more than five minutes old.
+  - header: X-Caretta-Delivery-Id
+    description: Identifier for one delivery attempt. Network retries reuse it.
+  - header: X-Caretta-Event-Id
+    description: Stable idempotency key for the event. Retries reuse it.
+
+delivery_semantics:
+  guarantee: at-least-once
+  deduplication_key: X-Caretta-Event-Id
+  ordering: not guaranteed
+  correlation_key: data.call.id
+  ack_status: any 2xx
+  ack_timeout_seconds: 10
+  retry_policy: retried with backoff for approximately two hours
+  recommended_handler: >-
+    Verify the signature, store or queue the event, return 2xx, then perform
+    slower processing asynchronously.
+
+endpoint_management_ui:
+  capabilities:
+  - enable or disable delivery
+  - change the URL, subscribed events, or delivery mode
+  - send a test event
+  - inspect the delivery log
+  - rotate the signing secret
+  - delete the endpoint
+
+x-evidence:
+- url: https://www.caretta.so/docs/webhooks
+  http_status: 200
+  fetched: '2026-08-13'

@@ -1,0 +1,181 @@
+generated: '2026-08-13'
+method: searched
+source: live probes plus https://www.caretta.so/docs
+
+standards:
+- id: mcp
+  name: Model Context Protocol
+  conforms: true
+  evidence: >-
+    Remote HTTP MCP server published at https://gateway.caretta.app/mcp with a
+    documented seven-tool surface; anonymous POST of a JSON-RPC tools/list
+    request returns HTTP 401 with an MCP-style bearer challenge rather than a
+    routing error, confirming a live MCP endpoint.
+  verified: probed
+
+- id: oauth2
+  name: OAuth 2.0 / 2.1 authorization code
+  conforms: true
+  evidence: >-
+    Browser-based authorization-code flow with per-client consent and
+    user-selectable scopes; authorization server advertises
+    code_challenge_methods_supported [S256, plain] and grant types
+    [authorization_code, refresh_token].
+  verified: probed
+
+- id: rfc9728
+  name: OAuth 2.0 Protected Resource Metadata
+  conforms: true
+  evidence: >-
+    https://gateway.caretta.app/.well-known/oauth-protected-resource returns 200
+    with resource, scopes_supported, bearer_methods_supported and
+    authorization_servers members, and the 401 WWW-Authenticate challenge
+    carries a resource_metadata parameter pointing at it.
+  verified: probed
+
+- id: rfc6750
+  name: OAuth 2.0 Bearer Token Usage
+  conforms: true
+  evidence: 'bearer_methods_supported: [header]; observed WWW-Authenticate: Bearer realm="caretta-mcp".'
+  verified: probed
+
+- id: rfc7591
+  name: OAuth 2.0 Dynamic Client Registration
+  conforms: true
+  evidence: >-
+    The authorization server named by Caretta's protected-resource document
+    exposes a registration_endpoint.
+  verified: probed
+  note: Provided by the upstream Supabase Auth tenant, not implemented by Caretta directly.
+
+- id: rfc8414
+  name: OAuth 2.0 Authorization Server Metadata
+  conforms: partial
+  evidence: >-
+    gateway.caretta.app/.well-known/oauth-authorization-server returns 404;
+    Caretta delegates to the Supabase-hosted authorization server, which does
+    serve valid RFC 8414 metadata at its own issuer.
+  verified: probed
+
+- id: oidc
+  name: OpenID Connect Discovery
+  conforms: partial
+  evidence: >-
+    No /.well-known/openid-configuration on any Caretta host (404). The
+    delegated authorization server supports the openid scope and issues id
+    tokens (RS256/HS256/ES256).
+  verified: probed
+
+- id: a2a
+  name: A2A Agent Card
+  conforms: partial
+  evidence: >-
+    An agent card is served at https://www.caretta.so/docs/.well-known/agent-card.json
+    (200) and graded near-conformant against A2A 1.0.0 — all three hard checks
+    pass but it uses supportedInterfaces rather than additionalInterfaces and
+    declares protocolVersion 0.3. It is not served at the origin well-known root
+    and describes the docs site rather than the product agent.
+  verified: probed
+  detail: a2a/caretta-a2a.yml
+
+- id: agent-skills
+  name: Agent Skills discovery 0.2.0
+  conforms: true
+  evidence: >-
+    https://www.caretta.so/docs/.well-known/agent-skills/index.json returns 200
+    declaring $schema https://schemas.agentskills.io/discovery/0.2.0/schema.json
+    with one skill-md entry carrying a sha256 digest.
+  verified: probed
+  detail: skills/_index.yml
+
+- id: llms-txt
+  name: llms.txt
+  conforms: true
+  evidence: >-
+    https://www.caretta.so/docs/llms.txt returns 200 in llms.txt format and is
+    advertised by an x-llms-txt response header and a rel="llms-txt" Link header.
+  verified: probed
+  caveat: >-
+    Its "## OpenAPI Specs" section links a Mintlify starter-kit sample rather
+    than a Caretta specification (see openapi below).
+
+- id: openapi
+  name: OpenAPI
+  conforms: false
+  evidence: >-
+    No OpenAPI document is published for any Caretta surface. The only
+    OpenAPI-shaped file reachable from Caretta's docs
+    (https://www.caretta.so/docs/api-reference/openapi.json) is the unmodified
+    Mintlify starter-kit sample: info.title "OpenAPI Plant Store", servers[]
+    http://sandbox.mintlify.com. It describes no Caretta capability and was not
+    saved.
+  verified: probed
+
+- id: asyncapi
+  name: AsyncAPI
+  conforms: false
+  evidence: >-
+    Caretta has a real event surface (five webhook events) but publishes no
+    AsyncAPI document. Captured as a webhook catalog instead.
+  verified: probed
+  detail: asyncapi/caretta-webhooks.yml
+
+- id: rfc9457
+  name: Problem Details for HTTP APIs
+  conforms: false
+  evidence: >-
+    Observed error bodies are {"message": "..."} with content-type
+    application/json; no application/problem+json and no type/title/status
+    members.
+  verified: probed
+
+- id: rfc8594
+  name: Sunset HTTP Header
+  conforms: false
+  evidence: No deprecation policy or Sunset/Deprecation header support published.
+
+- id: rfc9116
+  name: security.txt
+  conforms: false
+  evidence: /.well-known/security.txt returns 404 on caretta.so, www.caretta.so and gateway.caretta.app.
+  verified: probed
+
+- id: hmac-webhook-signing
+  name: Timestamped HMAC webhook signatures
+  conforms: true
+  evidence: >-
+    X-Caretta-Signature (v1= + hex HMAC-SHA256 over "{timestamp}.{raw body}"),
+    X-Caretta-Timestamp with a five-minute replay window, constant-time
+    comparison in the published reference verifier.
+  detail: asyncapi/caretta-webhooks.yml
+
+compliance_programs:
+- id: soc2
+  name: SOC 2
+  claimed: true
+  source: https://www.caretta.so
+  verification: >-
+    Claimed on the marketing site. The trust center at https://trust.caretta.so
+    (Oneleet-hosted, 200) is a client-rendered single-page app, so the
+    certification detail behind it could not be read without executing
+    JavaScript; the claim is recorded as published-but-unverified.
+- id: iso27001
+  name: ISO/IEC 27001
+  claimed: true
+  source: https://www.caretta.so
+  verification: same as SOC 2 above
+- id: gdpr
+  name: GDPR
+  claimed: true
+  source: https://www.caretta.so
+  verification: same as SOC 2 above
+
+x-evidence:
+- {url: 'https://gateway.caretta.app/.well-known/oauth-protected-resource', http_status: 200}
+- {url: 'https://gateway.caretta.app/mcp', http_status: 401}
+- {url: 'https://www.caretta.so/docs/.well-known/agent-card.json', http_status: 200}
+- {url: 'https://www.caretta.so/docs/.well-known/agent-skills/index.json', http_status: 200}
+- {url: 'https://www.caretta.so/docs/llms.txt', http_status: 200}
+- {url: 'https://www.caretta.so/docs/api-reference/openapi.json', http_status: 200}
+- {url: 'https://trust.caretta.so', http_status: 200}
+fetched: '2026-08-13'

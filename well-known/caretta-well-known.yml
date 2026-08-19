@@ -1,0 +1,109 @@
+generated: '2026-08-13'
+method: searched
+source: live probes of every Caretta host
+
+summary: >-
+  Caretta serves no /.well-known/ documents at the origin root of its marketing
+  or docs host: every canonical path on www.caretta.so and caretta.so returns
+  404 (a Vercel SPA 404 page, not a document). The real hits are on two other
+  surfaces: the MCP gateway host gateway.caretta.app serves a valid RFC 9728
+  OAuth protected-resource document, and the Mintlify docs subpath
+  https://www.caretta.so/docs/.well-known/ serves an A2A agent card, an Agent
+  Skills discovery index and an MCP server card. No security.txt is served
+  anywhere, so no SecurityTxt pointer is emitted.
+
+hosts:
+- host: https://gateway.caretta.app
+  documents:
+  - path: /.well-known/oauth-protected-resource
+    status: 200
+    file: caretta-oauth-protected-resource.json
+    spec: RFC 9728
+  - path: /.well-known/oauth-protected-resource/mcp
+    status: 200
+    note: >-
+      Identical body; this is the path named by the WWW-Authenticate
+      resource_metadata parameter returned from POST /mcp. Not saved separately.
+  - path: /.well-known/oauth-authorization-server
+    status: 404
+  - path: /.well-known/openid-configuration
+    status: 404
+  - path: /.well-known/agent-card.json
+    status: 404
+  - path: /.well-known/agent.json
+    status: 404
+  - path: /.well-known/security.txt
+    status: 404
+
+- host: https://www.caretta.so
+  note: >-
+    Origin root serves nothing. The documents below live under the /docs/
+    Mintlify subpath and are advertised from the docs origin by HTTP Link
+    headers (rel="agent-card", rel="agent-skills", rel="mcp-server-card",
+    rel="llms-txt").
+  documents:
+  - path: /.well-known/security.txt
+    status: 404
+  - path: /.well-known/openid-configuration
+    status: 404
+  - path: /.well-known/oauth-authorization-server
+    status: 404
+  - path: /.well-known/oauth-protected-resource
+    status: 404
+  - path: /.well-known/api-catalog
+    status: 404
+  - path: /.well-known/ai-plugin.json
+    status: 404
+  - path: /.well-known/agent-card.json
+    status: 404
+  - path: /docs/.well-known/agent-card.json
+    status: 200
+    file: ../a2a/caretta-agent-card.json
+    spec: A2A
+  - path: /docs/.well-known/agent-skills/index.json
+    status: 200
+    file: caretta-agent-skills-index.json
+    spec: Agent Skills discovery 0.2.0
+  - path: /docs/.well-known/mcp/server-card.json
+    status: 200
+    file: null
+    note: >-
+      NOT SAVED. This is the Mintlify documentation-search MCP
+      (https://caretta.mintlify.dev/docs/mcp), not a Caretta product server. Its
+      two tools are still carrying unrenamed starter-kit identifiers
+      (search_mint_starter_kit, query_docs_filesystem_mint_starter_kit) and it
+      only searches the docs corpus. Caretta's real MCP server is
+      https://gateway.caretta.app/mcp — see mcp/caretta-mcp.yml.
+  - path: /docs/.well-known/api-catalog
+    status: 404
+  - path: /docs/llms.txt
+    status: 200
+    file: ../llms/caretta-llms.txt
+
+- host: https://caretta.so
+  documents:
+  - path: /.well-known/security.txt
+    status: 404
+  - path: /.well-known/agent-card.json
+    status: 404
+  - path: /.well-known/agent.json
+    status: 404
+
+hosts_not_resolving:
+- api.caretta.so
+- docs.caretta.so
+- app.caretta.so
+- developer.caretta.so
+- developers.caretta.so
+- mcp.caretta.so
+- status.caretta.so
+- help.caretta.so
+hosts_not_resolving_note: >-
+  All NXDOMAIN as of 2026-08-13. There is no api.* or docs.* subdomain; the
+  documentation lives at the /docs path of the marketing host.
+
+security_txt:
+  served: false
+  note: >-
+    No security.txt on any host, so no SecurityTxt pointer is emitted in
+    apis.yml. See security/caretta-trust-center.yml for the compliance surface.

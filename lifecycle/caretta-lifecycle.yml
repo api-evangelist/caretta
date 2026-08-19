@@ -1,0 +1,90 @@
+generated: '2026-08-13'
+method: searched
+source: https://www.caretta.so/docs/webhooks
+
+versioning:
+  scheme: payload-field
+  field: schema_version
+  current: 1
+  applies_to: webhook event payloads
+  url_versioning: false
+  header_versioning: false
+  mcp_versioning: >-
+    No version is published for the MCP server or its tools; the endpoint is
+    unversioned (https://gateway.caretta.app/mcp).
+  policy_url: null
+  policy_published: false
+  forward_compatibility_contract: >-
+    Provider instructs consumers to tolerate additional fields so they remain
+    compatible as Caretta adds data. This is the only stated compatibility
+    guidance; there is no statement about what constitutes a breaking change or
+    how schema_version would be incremented.
+
+deprecation:
+  policy_url: null
+  policy_published: false
+  sunset_header: false
+  deprecation_header: false
+  note: >-
+    No deprecation policy, no RFC 8594 Sunset/Deprecation header support, and no
+    stated notice period were found on any Caretta surface. No Deprecation
+    pointer is emitted in apis.yml.
+
+sla:
+  url: null
+  published: false
+  uptime_target: null
+  note: >-
+    No SLA is published. The nearest published reliability statements are
+    operational rather than contractual: webhook delivery is at-least-once with
+    retries for approximately two hours, and AI notes are explicitly best-effort
+    with roughly 3-4% of calls never generating them.
+
+status_page:
+  url: null
+  published: false
+  probes:
+  - {url: 'https://status.caretta.so', result: NXDOMAIN}
+  - {url: 'https://www.caretta.so/status', http_status: 404}
+  note: >-
+    No status page exists. No StatusPage pointer is emitted in apis.yml.
+
+changelog:
+  url: null
+  published: false
+  probes:
+  - {url: 'https://www.caretta.so/changelog', http_status: 404}
+  note: >-
+    No dated changelog. The blog at https://www.caretta.so/blog carries a single
+    post (the pre-seed announcement) and is not a release log, so no
+    changelog/ artifact and no ChangeLog pointer are emitted.
+
+roadmap_statements:
+- statement: >-
+    "Endpoint management through a public REST API is planned but is not
+    currently available."
+  source: https://www.caretta.so/docs/webhooks
+  fetched: '2026-08-13'
+  implication: >-
+    Caretta has publicly committed to a future REST API for webhook endpoint
+    management. This is the only forward-looking API statement published, and it
+    is the reason no OpenAPI exists today. Not a roadmap page; no Roadmap
+    pointer is emitted.
+- statement: '"We''re constantly adding new connectors."'
+  source: https://www.caretta.so/integrations
+  fetched: '2026-08-13'
+
+deprecated_operations: []
+deprecated_operations_note: >-
+  None derivable: no OpenAPI document exists, and neither the MCP tool table nor
+  the webhook event table marks anything deprecated.
+
+maturity_assessment:
+  stage: early
+  evidence:
+  - Company founded 2025; Y Combinator W26 batch.
+  - Developer docs consist of four pages, published under the marketing host.
+  - No REST API, no SDKs, no CLI, no status page, no changelog, no SLA.
+  - >-
+    Agent-facing surfaces (MCP server, llms.txt, agent card, Agent Skill) are
+    ahead of the traditional API surface, which is the notable shape here.

@@ -1,0 +1,76 @@
+generated: '2026-08-13'
+method: searched
+source: https://www.caretta.so/docs/webhooks
+
+summary: >-
+  Caretta publishes no sandbox environment, no test-mode credentials and no
+  test/live key separation — there are no API keys at all. The one genuine test
+  facility it does publish is a webhook test-event trigger in the app UI. That
+  is recorded here honestly rather than inflated into a sandbox story.
+
+test_live_separation:
+  supported: false
+  key_prefixes: []
+  note: >-
+    No test mode, no separate test host, no test-vs-live key prefixes. The MCP
+    server and webhooks both operate against live organisation data.
+
+sandbox_environment:
+  available: false
+  base_url: null
+  note: >-
+    gateway.caretta.app is the only API host and there is no sandbox sibling.
+    No sandbox.* or test.* subdomain resolves.
+
+fixtures_and_triggers:
+- name: webhook.test
+  type: test-event trigger
+  location: Settings -> Webhooks -> Send test (Caretta app)
+  required_role: organisation administrator
+  description: >-
+    Sends a real signed webhook.test request to the configured endpoint so a
+    consumer can validate connectivity, signature verification and its 10-second
+    acknowledgement budget before going live.
+  payload_shape: |
+    {
+      "event": "webhook.test",
+      "schema_version": 1,
+      "event_id": "evt_01J...",
+      "delivery_id": "dlv_01J...",
+      "occurred_at": "2026-07-14T18:40:00.000Z",
+      "data": { "message": "Caretta webhook test" }
+    }
+  payload_note: >-
+    Structure transcribed from the provider's published example. Identifier
+    values are elided by the provider itself ("evt_01J...") and are not real
+    test tokens.
+- name: delivery log
+  type: inspection tool
+  location: Settings -> Webhooks
+  description: Inspect past delivery attempts for an endpoint.
+
+test_values:
+  cards: []
+  bank_accounts: []
+  magic_identifiers: []
+  note: >-
+    Not applicable — Caretta is not a payments or communications provider and
+    publishes no magic test identifiers.
+
+test_clocks:
+  supported: false
+
+connectivity_check:
+- surface: mcp
+  method: >-
+    Provider's suggested first prompt after connecting a client: "List my five
+    most recent Caretta calls." There is no anonymous or sandboxed way to
+    exercise a tool; the OAuth flow and a real account are required.
+
+verification_readiness:
+  can_a_developer_try_before_signup: false
+  reason: >-
+    Both surfaces require an authenticated Caretta account, and webhook setup
+    additionally requires organisation administrator access. There is no public
+    demo endpoint, no interactive console and no anonymous request that returns
+    product data.

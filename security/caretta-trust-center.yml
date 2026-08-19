@@ -1,0 +1,78 @@
+generated: '2026-08-13'
+method: searched
+probe: true
+url: https://trust.caretta.so
+http_status: 200
+
+vendor: Oneleet
+vendor_evidence: >-
+  trust.caretta.so is a CNAME to trust.oneleet.com (resolved 2026-08-13), the
+  hosted trust-center product.
+
+certifications:
+- name: ISO/IEC 27001
+  source: https://www.caretta.so
+  verified: false
+- name: SOC 2
+  source: https://www.caretta.so
+  verified: false
+- name: GDPR
+  source: https://www.caretta.so
+  verified: false
+
+verification_note: >-
+  The certifications above are claimed on Caretta's own marketing site, which
+  states "ISO 27001 certified", "SOC 2 compliant", "GDPR compliant" and
+  "Enterprise-grade encryption". They could NOT be confirmed from the trust
+  center itself: https://trust.caretta.so returns a 604-byte client-rendered
+  React shell (an empty #root div plus a bundled JS module) with no server-side
+  content, so the certification list, report availability, audit dates and
+  subprocessor list are unreadable without executing JavaScript. Each entry is
+  therefore recorded as claimed-by-provider, unverified-by-probe. Nothing about
+  audit scope, report type (SOC 2 Type I vs Type II) or currency is asserted
+  because none of it was observable.
+
+security_claims:
+- claim: Enterprise-grade encryption
+  source: https://www.caretta.so
+  specificity: low
+  note: No cipher suites, key management or encryption-at-rest detail published.
+
+vulnerability_disclosure:
+  published: false
+  security_txt: false
+  bug_bounty: null
+  contact: null
+  note: >-
+    No security.txt on caretta.so, www.caretta.so or gateway.caretta.app (all
+    404). No /security, /responsible-disclosure or /vulnerability-disclosure
+    page (404). No HackerOne, Bugcrowd or Intigriti program found, and no
+    security@ address published. Because nothing was verified, no
+    security/caretta-vulnerability-disclosure.yml artifact and no
+    type: Security pointer are emitted.
+
+data_handling_documented:
+- surface: MCP
+  claim: >-
+    The server follows the signed-in user's existing Caretta access and cannot
+    return calls the user could not otherwise see; per-client scope consent and
+    per-client revocation.
+  source: https://www.caretta.so/docs/caretta-mcp
+- surface: Zoom
+  claim: >-
+    Single Zoom permission requested (meeting:write:meeting). Caretta states it
+    does not request permission to read the Zoom profile, list existing
+    meetings, access recordings, read transcripts, or join meetings.
+  source: https://www.caretta.so/docs/zoom
+- surface: webhooks
+  claim: >-
+    Per-endpoint signing secret shown once, rotatable, with immediate
+    invalidation of the previous secret.
+  source: https://www.caretta.so/docs/webhooks
+
+evidence:
+- {source: 'https://trust.caretta.so', http_status: 200, kind: trust-center, note: 'JS-rendered SPA; no readable content'}
+- {source: 'https://www.caretta.so', http_status: 200, kind: marketing-claims, keywords: ['iso 27001', 'soc 2', 'gdpr', 'enterprise-grade encryption']}
+- {source: 'https://www.caretta.so/.well-known/security.txt', http_status: 404, kind: negative-probe}
+- {source: 'https://www.caretta.so/security', http_status: 404, kind: negative-probe}
+fetched: '2026-08-13'

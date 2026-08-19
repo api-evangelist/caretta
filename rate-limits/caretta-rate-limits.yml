@@ -1,0 +1,60 @@
+generated: '2026-08-13'
+method: searched
+source: https://www.caretta.so/docs
+limit_count: 0
+
+summary: >-
+  Caretta publishes no rate limits and no rate-limit response headers. Neither
+  the MCP documentation nor the webhook documentation states a request ceiling,
+  a window, a burst allowance, or what an agent should expect on exhaustion. No
+  429 was observed. An MCP client integrating against Caretta has no published
+  runtime signal to back off on — this is a real gap, recorded as an honest
+  zero rather than omitted.
+
+limits: []
+
+response_headers:
+  published: []
+  observed: []
+  note: >-
+    No X-RateLimit-*, RateLimit-* or Retry-After headers were present on any
+    response observed from gateway.caretta.app, including the 401 challenge on
+    POST /mcp and 404s on unrouted paths. Anonymous probing cannot reach an
+    authenticated tool call, so a limit applied only to authenticated MCP
+    traffic would not be visible here.
+
+exhaustion_status_code: unknown
+
+published_time_budgets:
+  note: >-
+    These are delivery and validation budgets, NOT rate limits. They are the
+    only numeric operational constraints Caretta publishes and are recorded here
+    so they are not mistaken for throttling policy.
+  budgets:
+  - name: webhook acknowledgement timeout
+    value: 10 seconds
+    applies_to: consumer endpoint
+    description: The consumer must return a 2xx response within 10 seconds.
+    source: https://www.caretta.so/docs/webhooks
+  - name: webhook retry window
+    value: approximately 2 hours
+    applies_to: Caretta delivery
+    description: Failed requests are retried with backoff for roughly two hours.
+    source: https://www.caretta.so/docs/webhooks
+  - name: signature replay window
+    value: 300 seconds
+    applies_to: consumer verification
+    description: Reject requests whose X-Caretta-Timestamp is more than five minutes old.
+    source: https://www.caretta.so/docs/webhooks
+  - name: call eligibility floor
+    value: 60 seconds
+    applies_to: event generation
+    description: >-
+      Calls of 60 seconds or less do not produce delivery events. A volume
+      filter on the event stream, not a rate limit.
+    source: https://www.caretta.so/docs/webhooks
+
+evidence:
+- {url: 'https://www.caretta.so/docs/caretta-mcp', http_status: 200, checked: '2026-08-13', note: 'no rate-limit section'}
+- {url: 'https://www.caretta.so/docs/webhooks', http_status: 200, checked: '2026-08-13', note: 'no rate-limit section'}
+- {url: 'https://gateway.caretta.app/mcp', http_status: 401, checked: '2026-08-13', note: 'no rate-limit headers on response'}

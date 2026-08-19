@@ -1,0 +1,43 @@
+generated: '2026-08-13'
+method: searched
+source: https://www.caretta.so
+plan_count: 0
+
+summary: >-
+  Caretta publishes no pricing. There is no /pricing page (HTTP 404), no pricing
+  entry in the sitemap, no pricing link in the site navigation or footer, and no
+  pricing or quota statement anywhere in the developer documentation. Access is
+  obtained through a booked demo or a self-serve sign-up whose price is not
+  disclosed before account creation.
+
+plans: []
+
+acquisition_paths:
+- name: Book an Intro
+  url: https://www.caretta.so/demo
+  http_status: 200
+  type: sales-led demo request
+  price_disclosed: false
+- name: Start free
+  url: https://www.caretta.so/signup
+  http_status: 200
+  type: self-serve sign-up
+  price_disclosed: false
+  note: >-
+    The homepage call to action reads "Start free", which implies a free tier or
+    trial exists, but no terms, duration, quota or paid-tier price are published
+    anywhere on the public site. Recorded as an undisclosed acquisition path,
+    not as a plan.
+
+api_pricing:
+  metered: unknown
+  note: >-
+    Neither the MCP server nor webhooks carry any published pricing, quota,
+    seat requirement or add-on cost. Whether developer access is included with
+    every plan or gated to a tier is not stated.
+
+evidence:
+- {url: 'https://www.caretta.so/pricing', http_status: 404, checked: '2026-08-13'}
+- {url: 'https://www.caretta.so/sitemap.xml', http_status: 200, checked: '2026-08-13', note: 'nine URLs, none pricing-related'}
+- {url: 'https://www.caretta.so/demo', http_status: 200, checked: '2026-08-13'}
+- {url: 'https://www.caretta.so/signup', http_status: 200, checked: '2026-08-13'}
