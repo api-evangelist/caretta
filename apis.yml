@@ -51,6 +51,18 @@ tags:
 - Conversation Intelligence
 - Revenue Operations
 - Y Combinator
+- MCP
+- Webhook
+- Agents
+tags_raw:
+- Company
+- Artificial Intelligence
+- Sales
+- Sales Intelligence
+- Real-Time
+- Conversation Intelligence
+- Revenue Operations
+- Y Combinator
 - Model Context Protocol
 - Webhooks
 - Agents
@@ -69,6 +81,10 @@ apis:
   humanURL: https://www.caretta.so/docs/caretta-mcp
   baseURL: https://gateway.caretta.app/mcp
   tags:
+  - MCP
+  - Agents
+  - Conversation Intelligence
+  tags_raw:
   - Model Context Protocol
   - Agents
   - Conversation Intelligence
