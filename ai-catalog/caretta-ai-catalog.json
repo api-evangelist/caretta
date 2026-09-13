@@ -1,0 +1,54 @@
+{
+  "specVersion": "1.0",
+  "host": {
+    "displayName": "Caretta",
+    "identifier": "caretta.so",
+    "url": "https://www.caretta.so"
+  },
+  "entries": [
+    {
+      "identifier": "urn:air:caretta.so:mcp:caretta",
+      "displayName": "Caretta MCP server",
+      "type": "application/mcp-server-card+json",
+      "url": "https://www.caretta.so/.well-known/mcp/server-card.json",
+      "description": "OAuth-scoped MCP access to Caretta sales calls, transcripts, and todos.",
+      "trustManifest": {
+        "workloadIdentity": "https://www.caretta.so",
+        "publishedFrom": "https://www.caretta.so",
+        "policies": {
+          "privacy": "https://www.caretta.so/privacy",
+          "terms": "https://www.caretta.so/terms",
+          "security": "https://www.caretta.so/security"
+        }
+      }
+    },
+    {
+      "identifier": "urn:air:caretta.so:api:rest",
+      "displayName": "Caretta REST API",
+      "type": "application/vnd.oai.openapi+json",
+      "url": "https://www.caretta.so/openapi.json",
+      "description": "OpenAPI 3.1 description of the Caretta public REST API."
+    },
+    {
+      "identifier": "urn:air:caretta.so:doc:llms-txt",
+      "displayName": "Caretta llms.txt",
+      "type": "text/markdown",
+      "url": "https://www.caretta.so/llms.txt",
+      "description": "Product overview and when-to-use guidance for AI agents."
+    },
+    {
+      "identifier": "urn:air:caretta.so:skills:index",
+      "displayName": "Caretta agent skills index",
+      "type": "application/json",
+      "url": "https://www.caretta.so/.well-known/agent-skills/index.json",
+      "description": "Index of what Caretta can do for an agent, with names and descriptions."
+    },
+    {
+      "identifier": "urn:air:caretta.so:doc:auth",
+      "displayName": "Caretta authentication guide",
+      "type": "text/markdown",
+      "url": "https://www.caretta.so/auth.md",
+      "description": "How agents authenticate with the MCP server and REST API."
+    }
+  ]
+}
