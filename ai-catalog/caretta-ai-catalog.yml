@@ -55,6 +55,7 @@ conformance:
       media type. ARD permits extension types without core registration.'
     - '[Caretta agent skills index] Media type ''application/json'' is a valid application extension media
       type. ARD permits extension types without core registration.'
+  did_web: null
 catalog:
   host_display_name: Caretta
   host_identifier: caretta.so
