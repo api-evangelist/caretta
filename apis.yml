@@ -170,6 +170,8 @@ common:
   url: lifecycle/caretta-lifecycle.yml
 - type: DataModel
   url: data-model/caretta-data-model.yml
+- type: Support
+  url: mailto:hello@caretta.so
 # No Sandbox pointer: sandbox/caretta-sandbox.yml records that Caretta ships no
 # sandbox, no console and no test credentials. The only test facility is a
 # webhook test-event trigger inside the authenticated app, which is not a
