@@ -108,3 +108,19 @@ x-ownership:
     as "the Caretta MCP server" in three separate client setup examples, and the endpoint's own RFC 9728
     metadata points resource_documentation back at https://caretta.so/docs/caretta-mcp. The two hosts
     cross-reference each other.
+rfc9728:
+  endpoint: https://gateway.caretta.app/mcp
+  metadata_url: https://gateway.caretta.app/.well-known/oauth-protected-resource/mcp
+  discovered_via: WWW-Authenticate resource_metadata on an anonymous POST initialize
+  fetched: '2026-09-25'
+  http_status: 200
+  content_type: application/json
+  document:
+    resource: https://gateway.caretta.app/mcp
+    authorization_servers:
+    - https://ztejbfpbhxgwecvxngtf.supabase.co/auth/v1
+    scopes_supported:
+    - openid
+    bearer_methods_supported:
+    - header
+    resource_documentation: https://caretta.so/docs/caretta-mcp
